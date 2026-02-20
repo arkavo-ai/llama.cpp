@@ -311,7 +311,7 @@ void main() {
 
         [[unroll]] for (uint32_t d = 0; d < HSV_per_thread / 4; ++d) {
             [[unroll]] for (uint32_t r = 0; r < rows_per_thread; ++r) {
-                Of[r][d] = FLOAT_TYPE(eMf[r]) * Of[r][d];
+                Of[r][d] = FLOAT_TYPEV4(eMf[r]) * Of[r][d];
             }
         }
 
@@ -365,7 +365,7 @@ void main() {
 #endif
                 }
                 [[unroll]] for (uint32_t r = 0; r < rows_per_thread; ++r) {
-                    Of[r][d] += FLOAT_TYPEV4(Pf[r] * Vf);
+                    Of[r][d] = fma(FLOAT_TYPEV4(Pf[r]), Vf, Of[r][d]);
                 }
             }
         }
@@ -448,7 +448,7 @@ void main() {
         }
 
         [[unroll]] for (uint32_t d = 0; d < HSV_per_thread / 4; ++d) {
-            Of[r][d] = FLOAT_TYPE(eMf) * Of[r][d];
+            Of[r][d] = FLOAT_TYPEV4(eMf) * Of[r][d];
 
             if (SubGroupSize > 0) {
                 [[unroll]] for (uint s = D_split; s < SubGroupSize; s *= 2) {
@@ -540,7 +540,7 @@ void main() {
                 ms = exp(Mf[r] - sink);
 
                 [[unroll]] for (uint32_t d = 0; d < HSV_per_thread / 4; ++d) {
-                    Of[r][d] *= FLOAT_TYPE(ms);
+                    Of[r][d] *= FLOAT_TYPEV4(ms);
                 }
             } else {
                 vs = exp(sink - Mf[r]);
@@ -557,7 +557,7 @@ void main() {
 
     [[unroll]] for (uint32_t d = 0; d < HSV_per_thread / 4; ++d) {
         [[unroll]] for (uint32_t r = 0; r < rows_per_thread; ++r) {
-            Of[r][d] *= FLOAT_TYPE(Lfrcp[r]);
+            Of[r][d] *= FLOAT_TYPEV4(Lfrcp[r]);
 #if defined(FLOAT_TYPE_MAX)
             Of[r][d] = clamp(Of[r][d], -FLOAT_TYPE_MAX, FLOAT_TYPE_MAX);
 #endif
